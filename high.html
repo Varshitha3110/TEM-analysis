@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nanoparticle Analysis Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">N</div>
+      <div class="brand-text">
+        <div class="title">High Magnification</div>
+        <div class="subtitle">Analysis</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <ul>
+        <li class="nav-item active" data-key="filter"><span class="icon">☰</span><span class="label">Filter</span></li>
+        <li class="nav-item has-submenu">
+          <span class="icon">🧾</span><span class="label">Magnification ▸</span>
+          <ul class="submenu">
+            <li><a href="high.html" class="submenu-item">High Magnification</a></li>
+            <li><a href="index.html" class="submenu-item">Low Magnification</a></li>
+          </ul>
+        </li>
+        <li class="nav-item" data-key="daterange"><span class="icon">📅</span><span class="label">Images Uploaded</span></li>
+        <li class="nav-item" data-key="daterange2"><span class="icon">🗓️</span><span class="label">Date Range</span></li>
+        <li class="nav-item" data-key="gortiple"><span class="icon">⚙️</span><span class="label">Parameters</span></li>
+        <li class="nav-item" data-key="stats"><span class="icon">📊</span><span class="label">Statistical Analysis</span></li>
+        <li class="nav-item" data-key="analysis"><span class="icon">🔎</span><span class="label">Analysis</span></li>
+        <li class="nav-item" data-key="trend"><span class="icon">🔮</span><span class="label">Trend Prediction</span></li>
+        <li class="nav-item has-submenu">
+          <span class="icon">⬇️</span><span class="label">Export ▸</span>
+          <ul class="submenu">
+            <li><a href="#" onclick="exportCSV('.table-card table')">Export CSV</a></li>
+            <li><a href="#" onclick="exportPDF('.table-card table')">Export PDF</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer"><small>v1.0 · local demo</small></div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <header class="topbar">
+      <div class="left">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="search">
+          <input id="searchInput" type="search" placeholder="Search sample, ID, date..." />
+        </div>
+      </div>
+      <div class="right">
+        <button class="cta">Cosh|garge</button>
+        <div class="profile" id="profileBtn">
+          <img src="profile.svg" alt="profile"/>
+          <span class="notif">3</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- UPLOAD / MULTI IMAGE -->
+    <section class="card upload-card">
+      <div class="upload-container">
+        <div class="upload-left">
+          <h3>Upload Images</h3>
+          <p class="muted">Click "Choose File" to pick image files. (JPEG, PNG, TIFF)</p>
+          
+          <div class="upload-buttons">
+            <button id="analyzeBtn" class="cta">nalyze</button>
+            <label for="fileInput" class="cta">Choose File</label>
+<input id="fileInput" type="file" accept="image/*" multiple hidden />
+          </div>
+        </div>
+        <div id="preview" class="preview-grid"></div>
+      </div>
+    </section>
+
+    <div id="output" class="results-box"></div>
+
+    <!-- GRAPHS -->
+    <section class="graphs-row">
+      <div class="card graph-card">
+        <div class="card-head"><h4>Particle Size Distribution</h4></div>
+        <canvas id="chart1" height="160"></canvas>
+      </div>
+      <div class="card graph-card">
+        <div class="card-head"><h4>Zeta Potential</h4></div>
+        <canvas id="chart2" height="160"></canvas>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="tables-row">
+      <div class="card table-card">
+        <!-- ANALYSIS OUTPUT -->
+<section class="card">
+  <h3>Analysis Output</h3>
+  <pre id="analysisOutput"
+    style="height: 300px; overflow-y: auto; background: #111; color: #0f0; padding: 10px; border-radius: 8px;"></pre>
+</section>
+
+<!-- CSV/Excel Table -->
+<section class="card">
+  <h3>Aggregates Data</h3>
+  <div style="overflow-x:auto; max-height:400px; border:1px solid #ccc; border-radius:8px; padding:5px;">
+    <table id="excelTable" style="width:100%; border-collapse: collapse;">
+      <thead id="excelHeader" style="position: sticky; top:0; background:#f5f5f5;"></thead>
+      <tbody id="excelBody"></tbody>
+    </table>
+  </div>
+</section>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Filename</th><th>Count</th><th>Other</th><th>Measure</th><th></th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function loadExcelToTable(excelFilePath) {
+  fetch(excelFilePath)
+    .then(res => res.arrayBuffer())
+    .then(ab => {
+      const workbook = XLSX.read(ab, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(sheet);
+
+      const header = document.getElementById('excelHeader');
+      const body = document.getElementById('excelBody');
+
+      header.innerHTML = '';
+      body.innerHTML = '';
+
+      if (data.length === 0) return;
+
+      // Table header
+      const trh = document.createElement('tr');
+      Object.keys(data[0]).forEach(k => {
+        const th = document.createElement('th');
+        th.textContent = k;
+        th.style.borderBottom = "2px solid #444";
+        th.style.padding = "6px 8px";
+        th.style.background = "#f0f0f0";
+        th.style.position = "sticky";
+        th.style.top = "0";
+        trh.appendChild(th);
+      });
+      header.appendChild(trh);
+
+      // Table rows
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        Object.values(row).forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          td.style.padding = "4px 6px";
+          td.style.borderBottom = "1px solid #ccc";
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    });
+}
+fetch("upload.php", { method: "POST", body: formData })
+  .then(res => res.json())
+  .then(data => {
+    outputContainer.innerText += data.output.join("\n");
+    outputContainer.scrollTop = outputContainer.scrollHeight;
+
+    if (data.status === "success") {
+      alert("Analysis complete!");
+
+      // Load CSV/Excel table beautifully
+      if (data.combined_excel) loadExcelToTable(data.combined_excel);
+
+      // Load PDFs
+      if (data.pdf_files) loadPdfGallery();
+    } else {
+      alert("Error executing Python script");
+    }
+  })
+  .catch(err => {
+    outputContainer.innerText += "\n⚠ Fetch error: " + err;
+  });
+
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+let uploadedFiles = [];
+
+fileInput.addEventListener('change', () => {
+  const files = Array.from(fileInput.files);
+  uploadedFiles = files.filter(f => f.type.startsWith('image/'));
+  preview.innerHTML = '';
+  uploadedFiles.forEach(file => {
+    const reader = new FileReader();
+    const img = document.createElement('img');
+    img.className = 'preview-thumb';
+    img.alt = file.name;
+    reader.onload = (e) => img.src = e.target.result;
+    reader.readAsDataURL(file);
+    preview.appendChild(img);
+  });
+});
+
+const analyzeBtn = document.getElementById('analyzeBtn');
+let chart1, chart2;
+
+analyzeBtn.addEventListener('click', async () => {
+  if(!uploadedFiles.length) return alert('Upload images first!');
+  
+  const formData = new FormData();
+  uploadedFiles.forEach(f => formData.append('images[]', f));
+
+  try {
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Analyzing...';
+
+    const res = await fetch('upload.php', { method: 'POST', body: formData });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+
+    const tbody = document.querySelector('.table-card tbody');
+    const thead = document.querySelector('.table-card thead tr');
+    tbody.innerHTML = '';
+    thead.innerHTML = ''; // reset headers
+    const outputBox = document.getElementById('output');
+    outputBox.innerHTML = '';
+
+    data.results.forEach(fileResult => {
+      // Show summary text
+      const summaryP = document.createElement('p');
+      summaryP.innerHTML = `<strong>${fileResult.output_text}</strong>`;
+      outputBox.appendChild(summaryP);
+
+      // Show processed images
+      if(fileResult.images && fileResult.images.length){
+        const imagesDiv = document.createElement('div');
+        imagesDiv.className = 'output-images';
+        imagesDiv.style.display = 'flex';
+        imagesDiv.style.flexWrap = 'wrap';
+        imagesDiv.style.marginTop = '10px';
+
+        fileResult.images.forEach(imgPath => {
+          const img = document.createElement('img');
+          img.src = imgPath;
+          img.style.width = '150px';
+          img.style.margin = '5px';
+          img.style.border = '1px solid #ccc';
+          img.style.borderRadius = '4px';
+          imagesDiv.appendChild(img);
+        });
+        outputBox.appendChild(imagesDiv);
+      }
+
+      // === Fetch and display CSV ===
+      if(fileResult.csv){
+        fetch(fileResult.csv)
+          .then(res => res.text())
+          .then(csvText => {
+            const rows = csvText.trim().split('\n').map(r => r.split(','));
+            
+            // Fill table headers from first row
+            thead.innerHTML = '';
+            rows[0].forEach(h => {
+              const th = document.createElement('th');
+              th.textContent = h;
+              thead.appendChild(th);
+            });
+
+            // Fill table body
+            tbody.innerHTML = '';
+            rows.slice(1).forEach(row => {
+              if(row.length === 1 && row[0] === "") return;
+              const tr = document.createElement('tr');
+              row.forEach((cell, colIdx) => {
+                const td = document.createElement('td');
+                let val = cell.trim();
+
+                // format numeric values
+                if(!isNaN(val) && val !== ""){
+                  let num = parseFloat(val);
+                  if(!isNaN(num)){
+                    num = num.toFixed(2);
+                    // append units based on header
+                    const header = rows[0][colIdx].toLowerCase();
+                    if(header.includes("pixel") || header.includes("px")) {
+                      val = num + " px";
+                    } else if(header.includes("nm") || header.includes("nanometer")) {
+                      val = num + " nm";
+                    } else {
+                      val = num;
+                    }
+                  }
+                }
+                td.textContent = val;
+                tr.appendChild(td);
+              });
+              tbody.appendChild(tr);
+            });
+          });
+      }
+
+      // PDF link
+      if(fileResult.pdf){
+        const pdfLink = document.createElement('p');
+        pdfLink.innerHTML = `<a href="${fileResult.pdf}" target="_blank" style="text-decoration: underline; color: #007BFF;">Download PDF</a>`;
+        outputBox.appendChild(pdfLink);
+      }
+    });
+
+  } catch(err){
+    console.error(err);
+    alert('Error analyzing images: '+err.message);
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = 'Analyze';
+  }
+});
+
+// === Export buttons ===
+function exportCSV(selector){
+  const table = document.querySelector(selector);
+  if(!table) return;
+  const wb = XLSX.utils.table_to_book(table);
+  XLSX.writeFile(wb, 'analysis.xlsx');
+}
+
+function exportPDF(selector){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("TEM Analysis Results",10,10);
+  doc.autoTable({ html: selector, startY:20 });
+  doc.save('analysis.pdf');
+}
+</script>
+
+</body>
+</html>

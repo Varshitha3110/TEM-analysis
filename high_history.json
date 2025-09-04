@@ -1,0 +1,55 @@
+[
+    {
+        "image": "high_uploads\/Region 4 Aggregate 2 74000X .jpg",
+        "csv": "",
+        "pngs": [],
+        "date": "2025-09-01 11:47:09"
+    },
+    {
+        "image": "high_uploads\/Region 1 Aggregate 4 74000X .jpg",
+        "csv": "",
+        "pngs": [
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X  - Copy_circles.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X  - Copy_contours.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X  - Copy_edges.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X  - Copy_histogram.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X  - Copy_threshold.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_circles.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_contours.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_edges.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_histogram.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_threshold.png"
+        ],
+        "date": "2025-09-01 11:40:58"
+    },
+    {
+        "image": "high_uploads\/Region 2 Aggregate 2 74000X .jpg",
+        "csv": "",
+        "pngs": [],
+        "date": "2025-09-01 09:50:00"
+    },
+    {
+        "image": "high_uploads\/Region 1 Aggregate 4 74000X copy.jpg",
+        "csv": "",
+        "pngs": [
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_circles.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_contours.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_edges.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_histogram.png",
+            "high_uploads\/jpg_files\/Region 1 Aggregate 4 74000X copy_threshold.png"
+        ],
+        "date": "2025-09-01 08:46:47"
+    },
+    {
+        "image": "high_uploads\/Region 5 Aggregate 2 74000X.jpg",
+        "csv": "high_uploads\/excel_files\/Region 5 Aggregate 2 74000X.csv",
+        "pngs": [
+            "high_uploads\/jpg_files\/Region 5 Aggregate 2 74000X_circles.png",
+            "high_uploads\/jpg_files\/Region 5 Aggregate 2 74000X_contours.png",
+            "high_uploads\/jpg_files\/Region 5 Aggregate 2 74000X_edges.png",
+            "high_uploads\/jpg_files\/Region 5 Aggregate 2 74000X_histogram.png",
+            "high_uploads\/jpg_files\/Region 5 Aggregate 2 74000X_threshold.png"
+        ],
+        "date": "2025-09-01 11:49:25"
+    }
+]
